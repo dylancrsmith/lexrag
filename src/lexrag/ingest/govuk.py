@@ -28,38 +28,47 @@ def _slug(s: str) -> str:
 
 def _element_lines(el: html.HtmlElement) -> list[str]:
     """Render one HTML element as plain-text lines: headings prefixed "#", list items "-"."""
-    tag = el.tag if isinstance(el.tag, str) else ""
+    tag = el.tag
     if tag in {"script", "style"}:
         return []
     if tag == "tr":
-        cells = [_clean(c.text_content()) for c in el if c.tag in {"td", "th"}]
+        cells = [_clean(c.text_content()) for c in el.iterchildren("td", "th")]
         return [" | ".join(cells)] if any(cells) else []
-    if tag in _BLOCKS and not any(child.tag in _BLOCKS or child.tag in {"ul", "ol"} for child in el):
+    if tag in _BLOCKS and next(el.iterchildren(*_BLOCKS, "ul", "ol"), None) is None:
         text = _clean(el.text_content())
         if not text:
             return []
         if tag.startswith("h") and tag[1:].isdigit():
             return [f"{'#' * int(tag[1])} {text}"]
         return [f"- {text}" if tag == "li" else text]
-    # Container (div, ul, table, or a block with nested blocks): keep its own leading text.
-    lines = []
-    if el.text and el.text.strip():
-        lines.append(("- " if tag == "li" else "") + _clean(el.text))
-    for child in el:
-        lines.extend(_element_lines(child))
+    # Container (div, ul, table, or a block with nested blocks).
+    lines = _children_lines(el)
+    if tag == "li" and lines:
+        lines[0] = f"- {lines[0]}"
+    return lines
+
+
+def _children_lines(el: html.HtmlElement) -> list[str]:
+    """Lines for everything inside `el`: its own text, child elements, and text between them."""
+    lines = [_clean(el.text)] if el.text and el.text.strip() else []
+    for child in el:  # all nodes: a comment's content is skipped but its tail is real text
+        if isinstance(child.tag, str):
+            lines.extend(_element_lines(child))
         if child.tail and child.tail.strip():
             lines.append(_clean(child.tail))
     return lines
 
 
-def html_to_text(fragment: str) -> str:
-    return "\n".join(line for el in _fragments(fragment) for line in _element_lines(el))
-
-
-def _fragments(fragment: str) -> list[html.HtmlElement]:
+def _root(fragment: str) -> html.HtmlElement | None:
+    """Parse an HTML fragment inside a wrapper <div>, so leading loose text is kept as its .text."""
     if not fragment.strip():
-        return []
-    return [el for el in html.fragments_fromstring(fragment) if not isinstance(el, str)]
+        return None
+    return html.fragment_fromstring(fragment, create_parent="div")
+
+
+def html_to_text(fragment: str) -> str:
+    root = _root(fragment)
+    return "\n".join(_children_lines(root)) if root is not None else ""
 
 
 def _body_html(body: Any) -> str:
@@ -75,56 +84,52 @@ def _body_html(body: Any) -> str:
 
 def _split_h2(fragment: str) -> list[tuple[str, str, str]]:
     """Split HTML at top-level <h2>s into (id, title, text); content before the first is "intro"."""
-    groups: list[tuple[str, str, list[html.HtmlElement]]] = [("intro", "", [])]
-    for el in _fragments(fragment):
-        if el.tag == "h2":
-            title = _clean(el.text_content())
-            groups.append((el.get("id") or _slug(title), title, []))
-        else:
-            groups[-1][2].append(el)
-    out = []
-    for gid, title, els in groups:
-        text = "\n".join(line for el in els for line in _element_lines(el))
-        if text:
-            out.append((gid, title, text))
-    return out
+    root = _root(fragment)
+    if root is None:
+        return []
+    groups: list[tuple[str, str, list[str]]] = [("intro", "", [])]
+    if root.text and root.text.strip():
+        groups[0][2].append(_clean(root.text))
+    for child in root:
+        if child.tag == "h2":
+            title = _clean(child.text_content())
+            groups.append((child.get("id") or _slug(title), title, []))
+        elif isinstance(child.tag, str):
+            groups[-1][2].extend(_element_lines(child))
+        if child.tail and child.tail.strip():
+            groups[-1][2].append(_clean(child.tail))
+    return [(gid, title, "\n".join(lines)) for gid, title, lines in groups if lines]
 
 
 def parse_govuk(data: dict[str, Any], doc_id: str) -> list[Section]:
     doc_title = _clean(str(data.get("title", doc_id)))
-    base_path = str(data.get("base_path", ""))
-    base_url = f"https://www.gov.uk{base_path}"
+    base_url = f"https://www.gov.uk{data.get('base_path', '')}"
     details = data.get("details") or {}
 
-    common = {"doc_id": doc_id, "doc_title": doc_title, "authority": "guidance"}
+    def section(section_id: str, label: str, title: str, text: str, url: str) -> Section:
+        return Section(
+            doc_id=doc_id,
+            section_id=section_id,
+            label=label,
+            title=title,
+            text=text,
+            url=url,
+            doc_title=doc_title,
+            authority="guidance",
+        )
+
     sections = []
     if parts := details.get("parts"):
         for i, part in enumerate(parts):
             title = _clean(part.get("title", ""))
             slug = part.get("slug") or _slug(title)
             if text := html_to_text(_body_html(part.get("body", ""))):
-                sections.append(
-                    Section(
-                        section_id=slug,
-                        label=title,
-                        title=title,
-                        text=text,
-                        url=base_url if i == 0 else f"{base_url}/{slug}",
-                        **common,
-                    )
-                )
+                url = base_url if i == 0 else f"{base_url}/{slug}"
+                sections.append(section(slug, title, title, text, url))
     else:
         for gid, title, text in _split_h2(_body_html(details.get("body", ""))):
-            sections.append(
-                Section(
-                    section_id=gid,
-                    label=title or "introduction",
-                    title=title or doc_title,
-                    text=text,
-                    url=base_url if gid == "intro" else f"{base_url}#{gid}",
-                    **common,
-                )
-            )
+            url = base_url if gid == "intro" else f"{base_url}#{gid}"
+            sections.append(section(gid, title or "introduction", title or doc_title, text, url))
     if not sections:
         raise ValueError(f"{doc_id}: no text found (schema {data.get('schema_name')!r})")
     return sections

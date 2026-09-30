@@ -53,7 +53,7 @@ def _clean(s: str) -> str:
 def _inline(el: etree._Element) -> str:
     """Text content of `el`, skipping editorial markers."""
     parts = [el.text or ""]
-    for child in el:
+    for child in el:  # all nodes, not just elements: a comment's tail is still provision text
         if isinstance(child.tag, str) and _local(child) not in _SKIP:
             parts.append(_inline(child))
         parts.append(child.tail or "")
@@ -63,9 +63,7 @@ def _inline(el: etree._Element) -> str:
 def _render(el: etree._Element, depth: int = 0) -> list[tuple[int, str]]:
     """Render a provision body as (indent-level, line) pairs, preserving (1)/(a)/(i) structure."""
     lines: list[tuple[int, str]] = []
-    for child in el:
-        if not isinstance(child.tag, str):
-            continue
+    for child in el.iterchildren(etree.Element):  # elements only: skips comments and PIs
         name = _local(child)
         if name in _SKIP:
             continue
@@ -89,7 +87,7 @@ def _render(el: etree._Element, depth: int = 0) -> list[tuple[int, str]]:
                 sub[0] = (depth, f"- {sub[0][1]}")
             lines.extend(sub)
         elif name == "tr":
-            cells = [_clean(_inline(c)) for c in child if isinstance(c.tag, str)]
+            cells = [_clean(_inline(c)) for c in child.iterchildren(etree.Element)]
             if any(cells):
                 lines.append((depth, " | ".join(cells)))
         else:  # P1para, P2para, BlockAmendment, lists, tables, Para, ...: descend
@@ -112,12 +110,11 @@ def _title(el: etree._Element | None) -> str:
 
 def _breadcrumbs(p1: etree._Element) -> tuple[str, ...]:
     crumbs = []
-    for anc in p1.iterancestors():
-        if isinstance(anc.tag, str) and _local(anc) in _STRUCTURAL:
-            num = anc.find(f"{_L}Number")
-            parts = [_clean(_inline(num)) if num is not None else "", _title(anc)]
-            if crumb := ": ".join(p for p in parts if p):
-                crumbs.append(crumb)
+    for anc in p1.iterancestors(*(f"{_L}{t}" for t in _STRUCTURAL)):
+        num = anc.find(f"{_L}Number")
+        parts = [_clean(_inline(num)) if num is not None else "", _title(anc)]
+        if crumb := ": ".join(p for p in parts if p):
+            crumbs.append(crumb)
     return tuple(reversed(crumbs))
 
 
@@ -129,17 +126,16 @@ def _extent(el: etree._Element) -> str | None:
 
 
 def _label(section_id: str) -> str:
-    """"section 86", "regulation 12", "schedule 1 paragraph 2"."""
+    """Human-readable locator: section-86 -> "section 86", schedule-1-paragraph-2 -> ..."""
     return section_id.replace("-", " ")
 
 
 def _notes(scope: etree._Element, commentaries: dict[str, tuple[str, str]]) -> tuple[str, ...]:
     refs: list[str] = []
-    for el in scope.iter():
-        if isinstance(el.tag, str):
-            ref = el.get("Ref") if _local(el) == "CommentaryRef" else el.get("CommentaryRef")
-            if ref and ref not in refs:
-                refs.append(ref)
+    for el in scope.iter(etree.Element):
+        ref = el.get("Ref") if _local(el) == "CommentaryRef" else el.get("CommentaryRef")
+        if ref and ref not in refs:
+            refs.append(ref)
     out = []
     for ref in refs:
         if ref in commentaries:
@@ -150,7 +146,7 @@ def _notes(scope: etree._Element, commentaries: dict[str, tuple[str, str]]) -> t
 
 
 def within(section_id: str, ancestor: str) -> bool:
-    """True if `section_id` is `ancestor` or one of its sub-provisions (schedule-3 ⊃ schedule-3-…)."""
+    """True if `section_id` is `ancestor` or a sub-provision of it (schedule-3-paragraph-2)."""
     return section_id == ancestor or section_id.startswith(f"{ancestor}-")
 
 
@@ -161,11 +157,9 @@ def _is_repealed(title: str, text: str) -> bool:
 
 def _provisions(doc: etree._Element) -> Iterator[etree._Element]:
     for p1 in doc.iter(f"{_L}P1"):
-        if not p1.get("id"):
-            continue
-        if any(_local(a) == "BlockAmendment" for a in p1.iterancestors() if isinstance(a.tag, str)):
-            continue
-        yield p1
+        in_amendment = next(p1.iterancestors(f"{_L}BlockAmendment"), None) is not None
+        if p1.get("id") and not in_amendment:
+            yield p1
 
 
 def parse_clml(xml: bytes, doc_id: str, exclude: tuple[str, ...] = ()) -> list[Section]:

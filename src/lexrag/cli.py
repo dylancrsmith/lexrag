@@ -43,7 +43,9 @@ def ingest(
     reports = run_ingest(load_domain(domain, settings), settings, refresh=refresh)
     table = Table("source", "sections", "chars", "raw", title=f"Ingested {domain}")
     for r in reports:
-        table.add_row(r.source_id, str(r.sections), f"{r.chars:,}", "cached" if r.cached else "downloaded")
+        table.add_row(
+            r.source_id, str(r.sections), f"{r.chars:,}", "cached" if r.cached else "downloaded"
+        )
     table.add_row(
         "[bold]total",
         f"[bold]{sum(r.sections for r in reports)}",
