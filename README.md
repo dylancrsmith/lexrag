@@ -1,5 +1,7 @@
 # lexrag
 
+[![CI](https://github.com/dylancrsmith/lexrag/actions/workflows/ci.yml/badge.svg)](https://github.com/dylancrsmith/lexrag/actions/workflows/ci.yml)
+
 Domain-swappable retrieval-augmented question answering over UK legislation and official guidance,
 with an evaluation harness. First domain: **KnowRights** (employment rights and food safety for UK
 hospitality workers).
