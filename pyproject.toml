@@ -1,0 +1,94 @@
+[project]
+name = "lexrag"
+version = "0.1.0"
+description = "Domain-swappable retrieval-augmented QA over UK legislation and official guidance, with a rigorous evaluation harness."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Dylan" }]
+keywords = ["rag", "retrieval", "evaluation", "legal", "uk-law", "llm"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "httpx>=0.27",
+    "lxml>=5.2",
+    "numpy>=1.26",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "rank-bm25>=0.2.2",
+    "rich>=13.7",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+ml = ["sentence-transformers>=3.0"]
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
+anthropic = ["anthropic>=0.40"]
+all = ["lexrag[ml,api,anthropic]"]
+
+[project.scripts]
+lexrag = "lexrag.cli:app"
+
+[dependency-groups]
+dev = [
+    "lxml-stubs>=0.5",
+    "mypy>=1.11",
+    "pre-commit>=3.8",
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "types-pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lexrag"]
+
+# --- tooling -----------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F",  # pycodestyle, pyflakes
+    "I",            # isort
+    "B",            # bugbear
+    "UP",           # pyupgrade
+    "SIM",          # simplify
+    "RUF",          # ruff-specific
+    "PTH",          # prefer pathlib
+    "N",            # naming
+]
+ignore = ["RUF001", "RUF002", "RUF003"]  # legal text legitimately contains curly quotes / dashes
+
+[tool.ruff.lint.per-file-ignores]
+"src/lexrag/cli.py" = ["B008"]  # typer's Option/Argument defaults are the idiom
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["rank_bm25", "sentence_transformers.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "network: hits live legislation.gov.uk / GOV.UK (deselect with -m 'not network')",
+]
+
+[tool.coverage.run]
+source = ["lexrag"]
+branch = true

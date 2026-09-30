@@ -1,0 +1,68 @@
+# KnowRights: employment rights and food safety rules for UK hospitality workers.
+#
+# Source ids are stable: the test set's gold labels ("<id>#<section-id>") refer to them.
+# All content is Crown copyright, reused under the Open Government Licence v3.0.
+
+name: hospitality
+title: KnowRights
+description: Employment rights and food safety rules for people working in UK hospitality.
+jurisdiction: Great Britain (England, Wales and Scotland). Northern Ireland has separate employment law.
+audience: >-
+  Hospitality workers (bar, kitchen, front-of-house, hotel and delivery staff), many of them young,
+  part-time, on zero-hours contracts, or with English as a second language.
+
+in_scope:
+  - working time, rest breaks, daily and weekly rest, night work
+  - holiday entitlement and holiday pay
+  - national minimum wage and national living wage
+  - tips, gratuities and service charges
+  - payslips, deductions from wages, written statements of employment particulars
+  - contract types, zero-hours contracts, notice periods
+  - food safety offences and duties relevant to people handling food
+
+out_of_scope:
+  - law outside Great Britain
+  - immigration, tax and benefits questions
+  - discrimination, unfair dismissal claims and tribunal procedure (refer to Acas)
+  - restaurant or venue recommendations and anything unrelated to workplace rights
+
+disclaimer: >-
+  KnowRights gives general information from UK legislation and GOV.UK guidance, not legal advice.
+  For advice about your situation, contact Acas (free, confidential): 0300 123 1100, www.acas.org.uk.
+
+sources:
+  # --- legislation (legislation.gov.uk, latest revised version) ---
+  - id: era1996
+    type: legislation
+    ref: ukpga/1996/18
+    # Schedules 1-3 are consequential amendments to other Acts, transitional provisions and a
+    # repeals table: no rights for workers, and schedule-3 alone is ~37k characters of noise.
+    exclude: [schedule-1, schedule-2, schedule-3]
+  - id: wtr1998
+    type: legislation
+    ref: uksi/1998/1833
+  - id: nmwa1998
+    type: legislation
+    ref: ukpga/1998/39
+    exclude: [schedule-2]  # amendments to the Agricultural Wages Acts
+  # The Act sets up the minimum wage; the Regulations hold the rates and the rules on what
+  # counts towards it (e.g. tips and accommodation), which is what workers actually ask about.
+  - id: nmwr2015
+    type: legislation
+    ref: uksi/2015/621
+  # Not listed: the Employment (Allocation of Tips) Act 2023. It is an amending Act whose
+  # substance is inserted into era1996 as Part 2B (ss. 27C-27Y). Ingesting both would index the
+  # same law twice, so tips questions are labelled against era1996 sections.
+  - id: fsa1990
+    type: legislation
+    ref: ukpga/1990/16
+    exclude: [schedule-2, schedule-3, schedule-4]  # amendments to other Acts, transitional provisions
+
+  # --- guidance (GOV.UK Content API) ---
+  - { id: govuk-breaks, type: govuk, path: /rest-breaks-work }
+  - { id: govuk-holiday, type: govuk, path: /holiday-entitlement-rights }
+  - { id: govuk-nmw, type: govuk, path: /national-minimum-wage-rates }
+  - { id: govuk-payslips, type: govuk, path: /payslips }
+  - { id: govuk-contracts, type: govuk, path: /employment-contracts-and-conditions }
+  - { id: govuk-zerohours, type: govuk, path: /contract-types-and-employer-responsibilities }
+  - { id: govuk-notice, type: govuk, path: /handing-in-your-notice }
