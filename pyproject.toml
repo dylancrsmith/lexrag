@@ -3,7 +3,7 @@ name = "lexrag"
 version = "0.1.0"
 description = "Domain-swappable retrieval-augmented QA over UK legislation and official guidance, with a rigorous evaluation harness."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = "MIT"
 authors = [{ name = "Dylan" }]
 keywords = ["rag", "retrieval", "evaluation", "legal", "uk-law", "llm"]
@@ -53,7 +53,7 @@ packages = ["src/lexrag"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
@@ -73,7 +73,7 @@ ignore = ["RUF001", "RUF002", "RUF003"]  # legal text legitimately contains curl
 "src/lexrag/cli.py" = ["B008"]  # typer's Option/Argument defaults are the idiom
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 warn_unreachable = true
 files = ["src", "tests"]

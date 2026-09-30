@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test fixture. Real CLML markup from legislation.gov.uk (Open Government Licence v3.0), trimmed
+  from the Employment Rights Act 1996 and the Employment (Allocation of Tips) Act 2023 into one
+  small document. Each provision exercises one parser behaviour; see tests/test_legislation.py.
+-->
+<Legislation xmlns="http://www.legislation.gov.uk/namespaces/legislation" DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18" RestrictExtent="E+W+S+N.I.">
+  <ukm:Metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ukm="http://www.legislation.gov.uk/namespaces/metadata">
+    <dc:title>Employment Rights Act 1996</dc:title>
+  </ukm:Metadata>
+  <Primary>
+    <PrimaryPrelims>
+      <Title>Employment Rights Act 1996</Title>
+    </PrimaryPrelims>
+    <Body>
+      <Part DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/part/IX" id="part-IX">
+        <Number>Part IX</Number>
+        <Title>Termination of employment</Title>
+        <Pblock>
+          <Title>Minimum period of notice</Title>
+
+          <!-- Nested (1)/(a) structure, amendment markup, commentary refs, an XML comment. -->
+          <P1group RestrictExtent="E+W+S">
+            <Title>Rights of employer and employee to minimum notice.</Title>
+            <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/86" id="section-86">
+              <Pnumber><CommentaryRef Ref="c-m1"/>86</Pnumber>
+              <P1para>
+                <P2 id="section-86-1">
+                  <Pnumber>1</Pnumber>
+                  <P2para>
+                    <Text>The notice required to be given by an employer to terminate the contract of employment of a person who has been continuously employed for one month or more&#8212;</Text>
+                    <P3 id="section-86-1-a">
+                      <Pnumber>a</Pnumber>
+                      <P3para><Text>is not less than one week&#8217;s notice if his period of continuous employment is less than two years,</Text></P3para>
+                    </P3>
+                    <P3 id="section-86-1-b">
+                      <Pnumber>b</Pnumber>
+                      <P3para><Text>is not less than one week&#8217;s notice for each year of continuous employment if his period of continuous employment is two years or more but less than twelve years, and</Text></P3para>
+                    </P3>
+                  </P2para>
+                </P2>
+                <P2 id="section-86-2">
+                  <Pnumber>2</Pnumber>
+                  <P2para>
+                    <Text>The notice required to be given by an <Substitution CommentaryRef="c-f1">employee</Substitution> who has been continuously employed for one month or more to terminate his contract of employment is not less than<!-- editorial comment --> one week.</Text>
+                  </P2para>
+                </P2>
+              </P1para>
+            </P1>
+          </P1group>
+
+          <!-- Repealed: only the number and a dotted title survive. Must be dropped. -->
+          <P1group RestrictExtent="E+W+S">
+            <Title>. . . . . . . . . . . . . . . .</Title>
+            <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/96" id="section-96">
+              <Pnumber><CommentaryRef Ref="c-f2"/>96</Pnumber>
+              <P1para><Text/></P1para>
+            </P1>
+          </P1group>
+        </Pblock>
+      </Part>
+
+      <!-- Inserts text into another Act. The id-less P1 inside BlockAmendment is part of this
+           section's text, never a section of its own. -->
+      <P1group RestrictExtent="E+W+S">
+        <Title>How tips etc must be dealt with</Title>
+        <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/200" id="section-200">
+          <Pnumber>200</Pnumber>
+          <P1para>
+            <Text>After section 27C of the Employment Rights Act 1996 insert&#8212;</Text>
+            <BlockAmendment TargetClass="primary" Context="main" Format="double">
+              <P1group>
+                <Title>How tips etc must be dealt with</Title>
+                <P1>
+                  <Pnumber>27D</Pnumber>
+                  <P1para>
+                    <P2>
+                      <Pnumber>1</Pnumber>
+                      <P2para><Text>An employer must ensure that the total amount of the qualifying tips is allocated fairly between workers of the employer.</Text></P2para>
+                    </P2>
+                  </P1para>
+                </P1>
+              </P1group>
+            </BlockAmendment>
+          </P1para>
+        </P1>
+      </P1group>
+
+      <!-- Has an N.I. variant in <Versions> with the same id. Only this main-body copy counts;
+           its URI carries an extent suffix, so the label must come from the id. -->
+      <P1group AltVersionRefs="v1" RestrictExtent="E+W+S">
+        <Title>Orders and regulations.</Title>
+        <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/236/england+wales+scotland" id="section-236">
+          <Pnumber>236</Pnumber>
+          <P1para><Text>Any power conferred by any provision of this Act to make any order or regulations is exercisable by statutory instrument.</Text></P1para>
+        </P1>
+      </P1group>
+    </Body>
+
+    <Schedules>
+      <Schedule DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/schedule/1" id="schedule-1">
+        <Number>SCHEDULE 1</Number>
+        <TitleBlock><Title>Workforce agreements</Title></TitleBlock>
+        <ScheduleBody>
+          <!-- Schedule paragraph: no P1group, so no title of its own. Contains a table. -->
+          <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/schedule/1/paragraph/1" id="schedule-1-paragraph-1">
+            <Pnumber>1</Pnumber>
+            <P1para>
+              <Text>An agreement is a workforce agreement if the following conditions are satisfied&#8212;</Text>
+              <Tabular>
+                <table xmlns="http://www.w3.org/1999/xhtml">
+                  <tbody>
+                    <tr><th>Condition</th><th>Requirement</th></tr>
+                    <tr><td>Form</td><td>in writing</td></tr>
+                  </tbody>
+                </table>
+              </Tabular>
+            </P1para>
+          </P1>
+        </ScheduleBody>
+      </Schedule>
+    </Schedules>
+  </Primary>
+
+  <Versions>
+    <Version id="v1" Description="N.I.">
+      <P1group RestrictExtent="N.I.">
+        <Title>Orders and regulations.</Title>
+        <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/236/ni" id="section-236">
+          <Pnumber>236</Pnumber>
+          <P1para><Text>NORTHERN IRELAND WORDING: must not appear in the parsed output.</Text></P1para>
+        </P1>
+      </P1group>
+    </Version>
+  </Versions>
+
+  <Commentaries>
+    <Commentary id="c-f1" Type="F"><Para><Text>Word in s. 86(2) substituted (1.10.2002) by S.I. 2002/2034, reg. 11.</Text></Para></Commentary>
+    <Commentary id="c-f2" Type="F"><Para><Text>S. 96 repealed (15.12.1999) by 1999 c. 26, s. 9.</Text></Para></Commentary>
+    <Commentary id="c-m1" Type="M"><Para><Text>1978 c. 44, s. 49.</Text></Para></Commentary>
+  </Commentaries>
+</Legislation>
