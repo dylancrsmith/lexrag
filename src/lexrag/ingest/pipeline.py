@@ -91,6 +91,11 @@ def ingest(
                     "sha256": hashlib.sha256(raw).hexdigest(),
                     "retrieved_at": datetime.now(UTC).isoformat(timespec="seconds"),
                 }
+                # Save now, not at the end: if a later source fails, the manifest must still
+                # describe every raw file already on disk.
+                _write_atomic(
+                    manifest_path, json.dumps(manifest, indent=2, sort_keys=True).encode()
+                )
             parsed = parse_source(source, raw)
             sections.extend(parsed)
             reports.append(
@@ -101,7 +106,6 @@ def ingest(
             client.close()
 
     _check_unique(sections)
-    _write_atomic(manifest_path, json.dumps(manifest, indent=2, sort_keys=True).encode())
     lines = (s.model_dump_json() for s in sections)
     _write_atomic(sections_path(domain.name, settings), ("\n".join(lines) + "\n").encode())
     return reports
