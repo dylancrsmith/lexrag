@@ -1,0 +1,19 @@
+{
+  "_comment": "Adapted from https://www.gov.uk/api/content/national-minimum-wage-rates (Open Government Licence v3.0). Body uses the list-of-content-types form and includes awkward HTML on purpose.",
+  "base_path": "/national-minimum-wage-rates",
+  "title": "National Minimum Wage and National Living Wage rates",
+  "schema_name": "answer",
+  "document_type": "answer",
+  "details": {
+    "body": [
+      {
+        "content_type": "text/govspeak",
+        "content": "Govspeak source: must not be used."
+      },
+      {
+        "content_type": "text/html",
+        "content": "The hourly rate depends on your age. <p>You must be at least school leaving age.</p>\n<h2 id=\"current-rates\">Current rates</h2>\n<table>\n  <thead><tr><th></th><th>21 and over</th><th>Under 18</th></tr></thead>\n  <tbody><tr><td>April 2026</td><td>£12.71</td><td>£8</td></tr></tbody>\n</table>\n<!-- editorial comment --> The rates change every April.\n<h2>Who gets the minimum wage</h2>\n<ol>\n  <li><p>Check your pay.</p></li>\n  <li><p>Contact Acas if it is too low.</p></li>\n</ol>"
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_comment": "Trimmed from https://www.gov.uk/api/content/rest-breaks-work (Open Government Licence v3.0).",
+  "base_path": "/rest-breaks-work",
+  "title": "Rest breaks at work",
+  "schema_name": "guide",
+  "document_type": "guide",
+  "details": {
+    "parts": [
+      {
+        "title": "Overview",
+        "slug": "overview",
+        "body": "<p>Workers over 18 are usually entitled to 3 types of break:</p>\n<ul>\n  <li>rest breaks at work</li>\n  <li>daily rest</li>\n</ul>\n<h2 id=\"rest-breaks-at-work\">Rest breaks at work</h2>\n<p>Workers have the right to one uninterrupted 20 minute rest break during their working day, if they work more than 6 hours a day.</p>"
+      },
+      {
+        "title": "Young workers",
+        "slug": "young-workers",
+        "body": "<p>Young workers are usually entitled to:</p>\n<ul>\n  <li>a 30 minute rest break if they work more than 4.5 hours</li>\n</ul>"
+      },
+      {
+        "title": "Empty part",
+        "slug": "empty-part",
+        "body": "<div>   </div>"
+      }
+    ]
+  }
+}
