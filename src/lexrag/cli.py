@@ -22,7 +22,7 @@ from lexrag.eval.retrieval import (
     sha256_of,
     summarize,
 )
-from lexrag.index import BM25Retriever, analyze, tokenize
+from lexrag.index import MODES, Retriever, build_retriever
 from lexrag.ingest import ingest as run_ingest
 from lexrag.ingest import load_sections
 from lexrag.ingest.pipeline import sections_path
@@ -114,7 +114,7 @@ def show(
 class _Timed:
     """Wraps a retriever to record how long each search takes."""
 
-    def __init__(self, retriever: BM25Retriever) -> None:
+    def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
         self.seconds: list[float] = []
 
@@ -128,9 +128,7 @@ class _Timed:
 @app.command("eval-retrieval")
 def eval_retrieval(
     domain: DomainArg,
-    mode: Annotated[
-        str, typer.Option(help="Retriever: bm25 (standard analyzer) | bm25-raw (no analyzer)")
-    ] = "bm25",
+    mode: Annotated[str, typer.Option(help=f"Retriever: {' | '.join(MODES)}")] = "bm25",
     chunking: Annotated[
         str | None, typer.Option(help="Chunking strategy: structure | fixed (default: settings)")
     ] = None,
@@ -143,9 +141,8 @@ def eval_retrieval(
     chunk_settings = ChunkingSettings.model_validate(
         settings.chunking.model_dump() | ({"strategy": chunking} if chunking else {})
     )
-    analyzers = {"bm25": analyze, "bm25-raw": tokenize}
-    if mode not in analyzers:
-        available = ", ".join(analyzers)
+    if mode not in MODES:
+        available = ", ".join(MODES)
         raise typer.BadParameter(
             f"unknown mode {mode!r}; available: {available}", param_hint="--mode"
         )
@@ -156,7 +153,9 @@ def eval_retrieval(
         console.print(f"[yellow]warning: {len(unverified)} unverified questions: {unverified}")
 
     chunks = chunk_sections(load_sections(domain, settings), chunk_settings)
-    retriever = _Timed(BM25Retriever(chunks, analyzer=analyzers[mode]))
+    start = time.perf_counter()
+    retriever = _Timed(build_retriever(mode, chunks, settings.embedding))
+    build_s = time.perf_counter() - start
     results = evaluate_retrieval(retriever, questions, k)
     summary = summarize(results)
     latency_ms = 1000 * sum(retriever.seconds) / len(retriever.seconds)
@@ -170,7 +169,10 @@ def eval_retrieval(
         cells = [f"{row[m]:.2f}" for m in METRICS]
         table.add_row(name, str(int(row["n"])), *cells, style=style)
     console.print(table)
-    console.print(f"{len(chunks)} chunks; mean search latency {latency_ms:.1f} ms")
+    console.print(
+        f"{len(chunks)} chunks; index built in {build_s:.1f} s; "
+        f"mean search latency {latency_ms:.1f} ms"
+    )
 
     misses = [r for r in results if r.recall < 1]
     if misses:
@@ -190,6 +192,8 @@ def eval_retrieval(
             "k": k,
             "chunks": len(chunks),
             "mean_latency_ms": round(latency_ms, 2),
+            "index_build_s": round(build_s, 2),
+            **({"embedding": settings.embedding.model_dump()} if mode == "dense" else {}),
             "lexrag_version": __version__,
             "sections_sha256": sha256_of(sections_path(domain, settings)),
             "questions_sha256": sha256_of(qpath),

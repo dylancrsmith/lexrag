@@ -87,12 +87,22 @@ class ChunkingSettings(_Strict):
         return self
 
 
+class EmbeddingSettings(_Strict):
+    model: str = "BAAI/bge-small-en-v1.5"
+    # bge v1.5 is trained with this prefix on short queries (not passages) for retrieval.
+    query_instruction: str = "Represent this sentence for searching relevant passages: "
+    batch_size: Annotated[int, Field(gt=0)] = 64
+    device: str | None = None
+    """"cuda", "cpu", ... None lets sentence-transformers pick (the GPU if there is one)."""
+
+
 class Settings(_Strict):
     root: Path = Field(default_factory=lambda: Path(os.environ.get(ROOT_ENV_VAR, ".")).resolve())
     data_dir: Path = Path("data")
     domains_dir: Path = Path("domains")
     results_dir: Path = Path("results")
     chunking: ChunkingSettings = ChunkingSettings()
+    embedding: EmbeddingSettings = EmbeddingSettings()
     user_agent: str = "lexrag/0.1 (+https://github.com/dylancrsmith/lexrag)"
 
     def resolve(self, p: Path) -> Path:

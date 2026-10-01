@@ -9,12 +9,14 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Sequence
+from typing import Protocol
 
 import numpy as np
 import snowballstemmer
 from numpy.typing import NDArray
 from rank_bm25 import BM25Okapi
 
+from lexrag.config import EmbeddingSettings
 from lexrag.models import Chunk, Retrieved
 
 Analyzer = Callable[[str], list[str]]
@@ -45,11 +47,21 @@ def analyze(text: str) -> list[str]:
     return list(_stemmer.stemWords([t for t in tokens if t not in ENGLISH_STOPWORDS]))
 
 
-def top_sections(chunks: Sequence[Chunk], scores: NDArray[np.float64], k: int) -> list[Retrieved]:
-    """The k best sections, each scored by its best chunk. Chunks scoring <= 0 never count."""
+class Retriever(Protocol):
+    def search(self, query: str, k: int) -> list[Retrieved]: ...
+
+
+def top_sections(
+    chunks: Sequence[Chunk], scores: NDArray[np.float64], k: int, *, positive_only: bool = True
+) -> list[Retrieved]:
+    """The k best sections, each scored by its best chunk.
+
+    With `positive_only` (keyword search), chunks scoring <= 0 matched nothing and never count.
+    Similarity scores (dense search) can be legitimately small or negative, so pass False.
+    """
     results: dict[str, Retrieved] = {}
     for i in np.argsort(-scores, kind="stable"):
-        if scores[i] <= 0 or len(results) >= k:
+        if len(results) >= k or (positive_only and scores[i] <= 0):
             break
         for key in chunks[i].section_keys:
             if key not in results and len(results) < k:
@@ -72,3 +84,74 @@ class BM25Retriever:
 
     def search(self, query: str, k: int) -> list[Retrieved]:
         return top_sections(self.chunks, self.scores(query), k)
+
+
+# --- dense ---------------------------------------------------------------------------------------
+
+
+class Embedder(Protocol):
+    def embed(self, texts: Sequence[str]) -> NDArray[np.float32]:
+        """One L2-normalised row per text."""
+        ...
+
+
+class SentenceTransformerEmbedder:
+    """A sentence-transformers model. Needs the optional `ml` extra (torch)."""
+
+    def __init__(self, settings: EmbeddingSettings) -> None:
+        from sentence_transformers import SentenceTransformer  # heavy import, only when used
+
+        self.settings = settings
+        self.model = SentenceTransformer(settings.model, device=settings.device)
+
+    def embed(self, texts: Sequence[str]) -> NDArray[np.float32]:
+        vectors = self.model.encode(
+            list(texts),
+            batch_size=self.settings.batch_size,
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+            show_progress_bar=False,
+        )
+        return np.asarray(vectors, dtype=np.float32)
+
+
+class DenseRetriever:
+    """Cosine-similarity search: chunk and query vectors are normalised, so a dot product."""
+
+    def __init__(
+        self, chunks: Sequence[Chunk], embedder: Embedder, query_instruction: str = ""
+    ) -> None:
+        if not chunks:
+            raise ValueError("cannot build an index over zero chunks")
+        self.chunks = list(chunks)
+        self.embedder = embedder
+        self.query_instruction = query_instruction
+        self.vectors = embedder.embed([c.embed_text for c in self.chunks])
+
+    def scores(self, query: str) -> NDArray[np.float64]:
+        q = self.embedder.embed([self.query_instruction + query])[0]
+        return np.asarray(self.vectors @ q, dtype=np.float64)
+
+    def search(self, query: str, k: int) -> list[Retrieved]:
+        return top_sections(self.chunks, self.scores(query), k, positive_only=False)
+
+
+# --- construction --------------------------------------------------------------------------------
+
+MODES = ("bm25", "bm25-raw", "dense")
+
+
+def build_retriever(
+    mode: str,
+    chunks: Sequence[Chunk],
+    embedding: EmbeddingSettings,
+    embedder: Embedder | None = None,
+) -> Retriever:
+    if mode == "bm25":
+        return BM25Retriever(chunks, analyzer=analyze)
+    if mode == "bm25-raw":
+        return BM25Retriever(chunks, analyzer=tokenize)
+    if mode == "dense":
+        embedder = embedder or SentenceTransformerEmbedder(embedding)
+        return DenseRetriever(chunks, embedder, embedding.query_instruction)
+    raise ValueError(f"unknown mode {mode!r}; available: {', '.join(MODES)}")
