@@ -91,6 +91,7 @@ class Settings(_Strict):
     root: Path = Field(default_factory=lambda: Path(os.environ.get(ROOT_ENV_VAR, ".")).resolve())
     data_dir: Path = Path("data")
     domains_dir: Path = Path("domains")
+    results_dir: Path = Path("results")
     chunking: ChunkingSettings = ChunkingSettings()
     user_agent: str = "lexrag/0.1 (+https://github.com/dylancrsmith/lexrag)"
 
