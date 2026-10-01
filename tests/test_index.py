@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from lexrag.index import BM25Retriever, tokenize, top_sections
+from lexrag.index import BM25Retriever, analyze, tokenize, top_sections
 from lexrag.models import Chunk
 
 
@@ -24,6 +24,27 @@ def test_tokenize_lowercases_and_keeps_decimals() -> None:
     assert tokenize("£11.10 a DAY, see reg. 15B (12.07%)") == [
         "11.10", "a", "day", "see", "reg", "15b", "12.07",
     ]  # fmt: skip
+
+
+def test_analyze_drops_stopwords_and_possessives_and_stems() -> None:
+    assert analyze("The worker's breaks are ALLOWED") == ["worker", "break", "allow"]
+
+
+def test_analyze_uses_the_standard_short_stop_list() -> None:
+    # "i", "my" and "do" are not in Lucene's default English stop set; kept on purpose.
+    assert analyze("do i get my payslip") == ["do", "i", "get", "my", "payslip"]
+
+
+def test_analyze_keeps_numbers_whole() -> None:
+    assert analyze("£11.10 a day and 12.07%") == ["11.10", "day", "12.07"]
+
+
+def test_stemming_matches_different_word_forms() -> None:
+    # BM25 gives zero weight to a term in half the documents, so use the whole corpus plus one.
+    corpus = [*CORPUS, chunk("era#s-13/0", "Deductions from wages")]
+    query = "can they deduct it"
+    assert BM25Retriever(corpus, analyzer=tokenize).search(query, k=1) == []
+    assert BM25Retriever(corpus).search(query, k=1)[0].section_key == "era#s-13"
 
 
 def test_bm25_finds_the_section_using_the_same_words() -> None:

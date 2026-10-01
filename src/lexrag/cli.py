@@ -22,7 +22,7 @@ from lexrag.eval.retrieval import (
     sha256_of,
     summarize,
 )
-from lexrag.index import BM25Retriever
+from lexrag.index import BM25Retriever, analyze, tokenize
 from lexrag.ingest import ingest as run_ingest
 from lexrag.ingest import load_sections
 from lexrag.ingest.pipeline import sections_path
@@ -128,7 +128,9 @@ class _Timed:
 @app.command("eval-retrieval")
 def eval_retrieval(
     domain: DomainArg,
-    mode: Annotated[str, typer.Option(help="Retriever: bm25")] = "bm25",
+    mode: Annotated[
+        str, typer.Option(help="Retriever: bm25 (standard analyzer) | bm25-raw (no analyzer)")
+    ] = "bm25",
     chunking: Annotated[
         str | None, typer.Option(help="Chunking strategy: structure | fixed (default: settings)")
     ] = None,
@@ -141,8 +143,12 @@ def eval_retrieval(
     chunk_settings = ChunkingSettings.model_validate(
         settings.chunking.model_dump() | ({"strategy": chunking} if chunking else {})
     )
-    if mode != "bm25":
-        raise typer.BadParameter(f"unknown mode {mode!r}; available: bm25", param_hint="--mode")
+    analyzers = {"bm25": analyze, "bm25-raw": tokenize}
+    if mode not in analyzers:
+        available = ", ".join(analyzers)
+        raise typer.BadParameter(
+            f"unknown mode {mode!r}; available: {available}", param_hint="--mode"
+        )
 
     qpath = questions_path(domain, settings)
     questions = load_questions(qpath)
@@ -150,7 +156,7 @@ def eval_retrieval(
         console.print(f"[yellow]warning: {len(unverified)} unverified questions: {unverified}")
 
     chunks = chunk_sections(load_sections(domain, settings), chunk_settings)
-    retriever = _Timed(BM25Retriever(chunks))
+    retriever = _Timed(BM25Retriever(chunks, analyzer=analyzers[mode]))
     results = evaluate_retrieval(retriever, questions, k)
     summary = summarize(results)
     latency_ms = 1000 * sum(retriever.seconds) / len(retriever.seconds)
