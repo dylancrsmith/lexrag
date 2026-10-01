@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-ml = ["sentence-transformers>=3.0"]
+ml = ["sentence-transformers>=3.0", "torch>=2.14"]
 api = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
 anthropic = ["anthropic>=0.40"]
 all = ["lexrag[ml,api,anthropic]"]
@@ -41,6 +41,16 @@ dev = [
     "ruff>=0.6",
     "types-pyyaml>=6.0",
 ]
+
+# PyPI's Windows torch wheels are CPU-only; take torch from PyTorch's CUDA 13.0 index instead
+# (needed for Blackwell GPUs such as the RTX 50 series). macOS has no CUDA builds.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform != 'darwin'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true  # only packages pinned to this index above come from it
 
 [build-system]
 requires = ["hatchling"]
