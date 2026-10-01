@@ -78,7 +78,7 @@ def test_first_run_downloads_parses_and_writes_everything(settings: Settings) ->
 
     assert server.requests == [LEGISLATION_URL, GOVUK_URL]
     assert [(r.source_id, r.sections, r.cached) for r in reports] == [
-        ("era1996", 4, False),
+        ("era1996", 5, False),
         ("govuk-breaks", 2, False),
     ]
     raw = settings.data_path("demo", "raw")
@@ -88,7 +88,7 @@ def test_first_run_downloads_parses_and_writes_everything(settings: Settings) ->
     keys = [s.key for s in load_sections("demo", settings)]
     assert keys[0] == "era1996#section-86"
     assert keys[-1] == "govuk-breaks#young-workers"
-    assert len(keys) == 6
+    assert len(keys) == 7
 
 
 def test_manifest_records_hash_and_url(settings: Settings) -> None:
@@ -109,7 +109,7 @@ def test_second_run_uses_cache(settings: Settings) -> None:
 
     assert server.requests == []
     assert all(r.cached for r in reports)
-    assert len(load_sections("demo", settings)) == 6
+    assert len(load_sections("demo", settings)) == 7
 
 
 def test_refresh_downloads_again(settings: Settings) -> None:

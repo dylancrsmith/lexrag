@@ -16,6 +16,7 @@ def sections() -> dict[str, Section]:
 def test_one_section_per_numbered_provision(sections: dict[str, Section]) -> None:
     assert list(sections) == [
         "section-86",
+        "section-97",
         "section-200",
         "section-236",
         "schedule-1-paragraph-1",
@@ -103,3 +104,16 @@ def test_rejects_non_clml_documents() -> None:
 
 def test_repealed_provisions_are_dropped(sections: dict[str, Section]) -> None:
     assert "section-96" not in sections
+
+
+def test_fully_repealed_provision_with_paragraph_shells_is_dropped(
+    sections: dict[str, Section],
+) -> None:
+    assert "section-98" not in sections
+
+
+def test_removed_text_becomes_a_short_marker(sections: dict[str, Section]) -> None:
+    assert sections["section-97"].text.splitlines() == [
+        "(1) [no longer in force]",
+        "(2) Where the notice required by section 86... is longer, the later date applies.",
+    ]

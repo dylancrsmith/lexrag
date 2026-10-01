@@ -40,6 +40,10 @@ _NUMBERED = {"P1", "P2", "P3", "P4", "P5", "P6", "P7", "P"}
 # E = extent, C = modification. (M = marginal citation is noise.)
 _NOTE_TYPES = {"F", "I", "E", "C"}
 _WS = re.compile(r"\s+")
+# legislation.gov.uk replaces repealed, revoked or omitted text with a spaced run of dots
+# (". . . ."), ~32 tokens of nothing. Unspaced "..." is an in-sentence omission and is kept.
+_REMOVED_TEXT = re.compile(r"\.(?: \.)+(?: ?\.)*")
+NO_LONGER_IN_FORCE = "[no longer in force]"
 
 
 def _local(el: etree._Element) -> str:
@@ -68,7 +72,7 @@ def _render(el: etree._Element, depth: int = 0) -> list[tuple[int, str]]:
         if name in _SKIP:
             continue
         if name in {"Text", "Title", "Number"}:
-            if s := _clean(_inline(child)):
+            if s := _REMOVED_TEXT.sub(NO_LONGER_IN_FORCE, _clean(_inline(child))):
                 lines.append((depth, s))
         elif name in _NUMBERED:
             num = child.find(f"{_L}Pnumber")
@@ -152,7 +156,8 @@ def within(section_id: str, ancestor: str) -> bool:
 
 def _is_repealed(title: str, text: str) -> bool:
     # Repealed provisions keep only their number and a dotted-out title.
-    return not re.search(r"[A-Za-z]{3}", text) and not re.search(r"[A-Za-z]{3}", title)
+    words = re.compile(r"[A-Za-z]{3}")
+    return not words.search(text.replace(NO_LONGER_IN_FORCE, "")) and not words.search(title)
 
 
 def _provisions(doc: etree._Element) -> Iterator[etree._Element]:

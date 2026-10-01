@@ -57,6 +57,36 @@
               <P1para><Text/></P1para>
             </P1>
           </P1group>
+
+          <!-- Partly repealed: removed text is a spaced dotted run; an in-sentence "..." is kept. -->
+          <P1group RestrictExtent="E+W+S">
+            <Title>Effective date of termination.</Title>
+            <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/97" id="section-97">
+              <Pnumber>97</Pnumber>
+              <P1para>
+                <P2 id="section-97-1">
+                  <Pnumber>1</Pnumber>
+                  <P2para><Text>. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .</Text></P2para>
+                </P2>
+                <P2 id="section-97-2">
+                  <Pnumber>2</Pnumber>
+                  <P2para><Text>Where the notice required by section 86... is longer, the later date applies.</Text></P2para>
+                </P2>
+              </P1para>
+            </P1>
+          </P1group>
+
+          <!-- Fully repealed, but its sub-paragraph shells survive. Must still be dropped. -->
+          <P1group RestrictExtent="E+W+S">
+            <Title>. . . . . . . . . . . . . . . .</Title>
+            <P1 DocumentURI="http://www.legislation.gov.uk/ukpga/1996/18/section/98" id="section-98">
+              <Pnumber>98</Pnumber>
+              <P1para>
+                <P2 id="section-98-1"><Pnumber>1</Pnumber><P2para><Text>. . . . . . . .</Text></P2para></P2>
+                <P2 id="section-98-2"><Pnumber>2</Pnumber><P2para><Text>. . . . . . . .</Text></P2para></P2>
+              </P1para>
+            </P1>
+          </P1group>
         </Pblock>
       </Part>
 
