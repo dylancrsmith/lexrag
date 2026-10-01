@@ -73,10 +73,25 @@ class Domain(_Strict):
 # --- engine settings ---------------------------------------------------------------------------
 
 
+class ChunkingSettings(_Strict):
+    strategy: Literal["structure", "fixed"] = "structure"
+    # bge-small reads 512 tokens and silently drops the rest. Measured on this corpus:
+    # ~4.5 chars/token and a <=41-token header for 95% of sections, so 1800 chars fits with margin.
+    max_chars: Annotated[int, Field(gt=0)] = 1800
+    overlap_chars: Annotated[int, Field(ge=0)] = 200
+
+    @model_validator(mode="after")
+    def _overlap_smaller_than_chunk(self) -> ChunkingSettings:
+        if self.overlap_chars >= self.max_chars:
+            raise ValueError("overlap_chars must be smaller than max_chars")
+        return self
+
+
 class Settings(_Strict):
     root: Path = Field(default_factory=lambda: Path(os.environ.get(ROOT_ENV_VAR, ".")).resolve())
     data_dir: Path = Path("data")
     domains_dir: Path = Path("domains")
+    chunking: ChunkingSettings = ChunkingSettings()
     user_agent: str = "lexrag/0.1 (+https://github.com/dylancrsmith/lexrag)"
 
     def resolve(self, p: Path) -> Path:

@@ -44,3 +44,18 @@ class Section(BaseModel):
     def citation(self) -> str:
         """e.g. "Employment Rights Act 1996, section 86"."""
         return f"{self.doc_title}, {self.label}" if self.label else self.doc_title
+
+
+class Chunk(BaseModel):
+    """A retrievable passage. Search runs over chunks; results and metrics are per section."""
+
+    model_config = ConfigDict(frozen=True)
+
+    chunk_id: str
+    """"<section key>/<n>" for structure chunks, "<doc_id>@<n>" for fixed windows."""
+    section_keys: tuple[str, ...]
+    """The section(s) this chunk's text comes from. A fixed window can span several."""
+    text: str
+    """The passage itself: what the LLM is shown."""
+    embed_text: str
+    """What gets embedded and keyword-indexed: `text`, plus a header for structure chunks."""
