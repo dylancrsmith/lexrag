@@ -59,3 +59,13 @@ class Chunk(BaseModel):
     """The passage itself: what the LLM is shown."""
     embed_text: str
     """What gets embedded and keyword-indexed: `text`, plus a header for structure chunks."""
+
+
+class Retrieved(BaseModel):
+    """One search result: a section, scored by its best-matching chunk."""
+
+    model_config = ConfigDict(frozen=True)
+
+    section_key: str
+    score: float
+    chunk: Chunk
