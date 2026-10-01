@@ -105,5 +105,5 @@ def save_run(
         "summary": summary,
         "questions": [r.model_dump() for r in results],
     }
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_bytes((json.dumps(payload, indent=2, ensure_ascii=False) + "\n").encode("utf-8"))
     return path
