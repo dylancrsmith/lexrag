@@ -1,0 +1,405 @@
+{
+  "created_at": "20261002T000318Z",
+  "config": {
+    "domain": "hospitality",
+    "mode": "dense",
+    "chunking": "structure",
+    "max_chars": 1800,
+    "overlap_chars": 200,
+    "k": 5,
+    "chunks": 1098,
+    "mean_latency_ms": 7.61,
+    "index_build_s": 15.79,
+    "embedding": {
+      "model": "BAAI/bge-small-en-v1.5",
+      "query_instruction": "Represent this sentence for searching relevant passages: ",
+      "batch_size": 64,
+      "device": null
+    },
+    "lexrag_version": "0.1.0",
+    "sections_sha256": "7c01979983d8a5ef8e98250aead9235ee5cc42e86bba7b2643f98609f6038138",
+    "questions_sha256": "29148bee2c28c37ec33f28bf7792a91efcb3c035d8fa3d86ea8997f0113aeb92"
+  },
+  "summary": {
+    "factual": {
+      "n": 10,
+      "recall": 0.7,
+      "hit": 0.7,
+      "complete": 0.7,
+      "mrr": 0.45,
+      "ndcg": 0.5123212623289701
+    },
+    "false_premise": {
+      "n": 3,
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.611111111111111,
+      "ndcg": 0.7103099178571526
+    },
+    "multi_hop": {
+      "n": 4,
+      "recall": 0.625,
+      "hit": 0.75,
+      "complete": 0.5,
+      "mrr": 0.4583333333333333,
+      "ndcg": 0.5200698027129531
+    },
+    "all": {
+      "n": 17,
+      "recall": 0.7352941176470589,
+      "hit": 0.7647058823529411,
+      "complete": 0.7058823529411765,
+      "mrr": 0.48039215686274506,
+      "ndcg": 0.5490836228066454
+    }
+  },
+  "questions": [
+    {
+      "id": "hosp-001",
+      "category": "factual",
+      "question": "do i get a break if im doing a 7 hour shift? how long for",
+      "retrieved": [
+        "govuk-breaks#overview",
+        "govuk-breaks#compensatory-rest",
+        "govuk-breaks#taking-breaks",
+        "wtr1998#regulation-12",
+        "govuk-breaks#young-workers"
+      ],
+      "requirement_ranks": [
+        1
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "hosp-002",
+      "category": "factual",
+      "question": "finished at 1am after a late close and the rota has me back in at 9am. is that even allowed??",
+      "retrieved": [
+        "wtr1998#regulation-11",
+        "wtr1998#regulation-15D",
+        "wtr1998#regulation-27A",
+        "wtr1998#regulation-30B",
+        "nmwa1998#section-11A"
+      ],
+      "requirement_ranks": [
+        null
+      ],
+      "recall": 0.0,
+      "hit": 0.0,
+      "complete": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0
+    },
+    {
+      "id": "hosp-003",
+      "category": "factual",
+      "question": "how many days off am i meant to get a week? ive just done 9 days straight",
+      "retrieved": [
+        "wtr1998#regulation-16",
+        "wtr1998#regulation-11",
+        "era1996#section-57ZF",
+        "wtr1998#regulation-15C",
+        "govuk-holiday#holiday-pay"
+      ],
+      "requirement_ranks": [
+        2
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.5,
+      "ndcg": 0.6309297535714575
+    },
+    {
+      "id": "hosp-004",
+      "category": "factual",
+      "question": "whats minimum wage for a 19 year old atm",
+      "retrieved": [
+        "nmwa1998#section-19B",
+        "nmwr2015#regulation-4A",
+        "govuk-nmw#intro",
+        "govuk-nmw#current-rates",
+        "nmwa1998#section-19A"
+      ],
+      "requirement_ranks": [
+        2
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.5,
+      "ndcg": 0.6309297535714575
+    },
+    {
+      "id": "hosp-005",
+      "category": "factual",
+      "question": "my boss doesnt give us payslips, the money just goes in the bank. is that allowed",
+      "retrieved": [
+        "govuk-payslips#intro",
+        "era1996#section-15",
+        "era1996#section-184",
+        "govuk-payslips#what-should-be-on-your-payslip",
+        "era1996#section-159"
+      ],
+      "requirement_ranks": [
+        1
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "hosp-006",
+      "category": "factual",
+      "question": "started at a new restaurant 3 weeks ago and still havent got a contract or anything in writing. when are they meant to give me one",
+      "retrieved": [
+        "govuk-notice#giving-notice",
+        "era1996#section-42",
+        "govuk-contracts#problems-with-a-written-statement",
+        "govuk-notice#overview",
+        "govuk-holiday#booking-time-off"
+      ],
+      "requirement_ranks": [
+        null
+      ],
+      "recall": 0.0,
+      "hit": 0.0,
+      "complete": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0
+    },
+    {
+      "id": "hosp-007",
+      "category": "factual",
+      "question": "im on zero hours at a cafe and they said i cant pick up shifts at another restaurant. can they actually stop me",
+      "retrieved": [
+        "era1996#section-27BP",
+        "era1996#section-27BT",
+        "era1996#section-27BQ",
+        "govuk-zerohours#zero-hour-contracts",
+        "era1996#section-27BM"
+      ],
+      "requirement_ranks": [
+        4
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.25,
+      "ndcg": 0.43067655807339306
+    },
+    {
+      "id": "hosp-008",
+      "category": "factual",
+      "question": "chef told us to plate up basa when the menu says cod. is that illegal?",
+      "retrieved": [
+        "fsa1990#section-15C",
+        "fsa1990#section-15",
+        "fsa1990#section-7",
+        "fsa1990#section-14",
+        "fsa1990#schedule-1-paragraph-2"
+      ],
+      "requirement_ranks": [
+        4
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.25,
+      "ndcg": 0.43067655807339306
+    },
+    {
+      "id": "hosp-009",
+      "category": "factual",
+      "question": "i live in at the hotel i work at and they take rent out of my wages. how much of that can count towards minimum wage?",
+      "retrieved": [
+        "nmwr2015#regulation-16",
+        "nmwr2015#regulation-14",
+        "nmwr2015#regulation-15",
+        "nmwr2015#regulation-7",
+        "nmwr2015#regulation-10"
+      ],
+      "requirement_ranks": [
+        1,
+        2
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "hosp-010",
+      "category": "factual",
+      "question": "been at the same pub 3 years and theyre letting me go. how much notice do they have to give me",
+      "retrieved": [
+        "wtr1998#schedule-3-paragraph-6",
+        "govuk-notice#giving-notice",
+        "era1996#section-42",
+        "era1996#section-150",
+        "govuk-holiday#booking-time-off"
+      ],
+      "requirement_ranks": [
+        null
+      ],
+      "recall": 0.0,
+      "hit": 0.0,
+      "complete": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0
+    },
+    {
+      "id": "hosp-011",
+      "category": "multi_hop",
+      "question": "im 17 and do 6 hour shifts at the weekend. what breaks do i get and how long do i need off between shifts",
+      "retrieved": [
+        "govuk-breaks#overview",
+        "govuk-breaks#young-workers",
+        "wtr1998#regulation-12",
+        "govuk-breaks#compensatory-rest",
+        "wtr1998#regulation-6"
+      ],
+      "requirement_ranks": [
+        2,
+        2
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.5,
+      "ndcg": 0.7737056144690833
+    },
+    {
+      "id": "hosp-012",
+      "category": "multi_hop",
+      "question": "how much paid holiday do you get a year if youre full time?",
+      "retrieved": [
+        "govuk-holiday#holiday-pay",
+        "govuk-holiday#entitlement",
+        "govuk-holiday#taking-holiday-before-leaving-a-job",
+        "govuk-holiday#calculate-leave-entitlement",
+        "wtr1998#regulation-16A"
+      ],
+      "requirement_ranks": [
+        1,
+        1
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "hosp-013",
+      "category": "multi_hop",
+      "question": "can my work use our tips to make our pay up to minimum wage?",
+      "retrieved": [
+        "era1996#section-27C",
+        "nmwr2015#regulation-7",
+        "nmwr2015#regulation-10",
+        "nmwr2015#regulation-4B",
+        "era1996#section-27G"
+      ],
+      "requirement_ranks": [
+        3,
+        null
+      ],
+      "recall": 0.5,
+      "hit": 1.0,
+      "complete": 0.0,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.3065735963827292
+    },
+    {
+      "id": "hosp-014",
+      "category": "multi_hop",
+      "question": "till was £50 down at the end of my shift and my manager says its coming out of my wages. can they do that?",
+      "retrieved": [
+        "govuk-notice#payment-during-your-notice-period",
+        "era1996#section-130",
+        "era1996#section-25",
+        "era1996#section-27BP",
+        "era1996#section-57ZM"
+      ],
+      "requirement_ranks": [
+        null,
+        null,
+        null
+      ],
+      "recall": 0.0,
+      "hit": 0.0,
+      "complete": 0.0,
+      "mrr": 0.0,
+      "ndcg": 0.0
+    },
+    {
+      "id": "hosp-019",
+      "category": "false_premise",
+      "question": "my manager says we only get a break if we work over 8 hours. is that right?",
+      "retrieved": [
+        "govuk-breaks#overview",
+        "govuk-breaks#taking-breaks",
+        "wtr1998#regulation-12",
+        "govuk-breaks#compensatory-rest",
+        "govuk-breaks#young-workers"
+      ],
+      "requirement_ranks": [
+        1
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    {
+      "id": "hosp-020",
+      "category": "false_premise",
+      "question": "my boss says theyre allowed to keep half the tips because its their business. thats right isnt it",
+      "retrieved": [
+        "era1996#section-27X",
+        "era1996#section-27V",
+        "era1996#section-27D",
+        "era1996#section-27C",
+        "era1996#section-27F"
+      ],
+      "requirement_ranks": [
+        3
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.3333333333333333,
+      "ndcg": 0.5
+    },
+    {
+      "id": "hosp-021",
+      "category": "false_premise",
+      "question": "im on zero hours so i dont get holiday pay right?",
+      "retrieved": [
+        "govuk-holiday#holiday-pay",
+        "govuk-holiday#entitlement",
+        "govuk-holiday#taking-holiday-before-leaving-a-job",
+        "wtr1998#regulation-16A",
+        "govuk-holiday#calculate-leave-entitlement"
+      ],
+      "requirement_ranks": [
+        2
+      ],
+      "recall": 1.0,
+      "hit": 1.0,
+      "complete": 1.0,
+      "mrr": 0.5,
+      "ndcg": 0.6309297535714575
+    }
+  ]
+}

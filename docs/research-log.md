@@ -140,7 +140,20 @@ Each decision: what, why, and the evidence behind it.
 - Motivation: an analyzer-less BM25 is weaker than what any real search engine does, so comparing
   dense search against it would overstate dense search's advantage.
 
-### D9. Plan for the rest of the retrieval ablation
+### D9. Dense retrieval (`dbc6807`)
+- **Model:** `BAAI/bge-small-en-v1.5` (384-dim, 512-token window, ~130 MB), run locally on the
+  RTX 5060 Ti. Chunks are embedded once (header + text); search is cosine similarity
+  (normalised vectors, so a dot product), grouped into sections like BM25.
+- **Query instruction:** queries (not passages) get bge's retrieval prefix
+  `"Represent this sentence for searching relevant passages: "`, as its model card recommends
+  for short-query to long-passage search.
+- Dense search always returns k results (there is no "no match"), so the BM25 rule "drop
+  scores <= 0" does not apply to it.
+- Tested without a GPU via a fake embedder (CI has no torch); a real-model test, skipped where
+  the `ml` extra is missing, checks that basa/cod finds food-quality s.14 and payslips finds the
+  itemised-pay-statement s.8, which BM25 cannot.
+
+### D10. Plan for the rest of the retrieval ablation
 `BM25 → dense → hybrid (RRF) → + LLM query rewriting → + reranker`, each a row with Recall@5 and
 latency. Once the test set grows towards 150–200 it will be split into a **dev set** (for tuning)
 and a **held-out test set** (run once at the end).
@@ -188,6 +201,7 @@ Retrieval, hospitality seed set (17 answerable questions), structure chunks, k =
 |---|---|---|---|---|---|---|---|
 | BM25, raw tokens | 0.35 | 0.35 | 0.35 | 0.25 | 0.28 | 2.0 ms | `20261001T204333Z_bm25-raw_structure.json` |
 | BM25, standard analyzer | 0.35 | 0.35 | 0.35 | 0.31 | 0.32 | 1.6 ms | `20261001T204342Z_bm25_structure.json` |
+| Dense, bge-small-en-v1.5 | **0.74** | 0.76 | **0.71** | **0.48** | **0.55** | 7.6 ms (+15.8 s index build) | `20261002T000318Z_dense_structure.json` |
 
 **Reading:**
 - The analyzer found nothing new (the same 6 hits and 11 misses) but **ranked the hits higher**
@@ -198,6 +212,19 @@ Retrieval, hospitality seed set (17 answerable questions), structure chunks, k =
   questions. The analyzer reduced this.
 - The remaining misses are **vocabulary mismatch**, which no keyword method can fix. That is the
   target for dense retrieval.
+- **Dense more than doubled recall (0.35 → 0.74) and lost nothing:** every question BM25 found,
+  dense also found, and misses fell from 11 to 5. All false-premise questions are now retrieved,
+  and multi-hop Complete@5 went from 0.25 to 0.50. *Prediction recorded beforehand and wrong:* that
+  dense would lose some exact-term questions BM25 got right.
+- **Dense misses are near-misses:** the right neighbourhood, the wrong neighbour. ERA s.27C
+  instead of 27D (tips); WTR reg 11 (weekly rest) instead of reg 10 (daily rest) for "finished
+  at 1am, back at 9am"; ERA s.25 from the right Part (*Protection of wages*) instead of s.13/17/18
+  for the till shortage; the employee's-notice guidance instead of the employer's notice in
+  s.86.
+- **Implication for the next rows:** BM25 also missed all 5, so hybrid fusion has little to add
+  at the top (still to be measured). A reranker (which reads query and passage together) targets
+  wrong-neighbour errors; query rewriting targets the ones that need inference (1am→9am means
+  daily rest).
 - **Caution:** with 17 questions, one question changing rank moves MRR by about 0.06. Report
   these as directions, not precise gains, until the test set is larger.
 
